@@ -1,0 +1,4 @@
+skew==0.9.0
+elasticsearch==1.1.1
+click==2.4
+pytz==2014.7

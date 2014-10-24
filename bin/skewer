@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+# Copyright (c) 2014 Scopely, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"). You
+# may not use this file except in compliance with the License. A copy of
+# the License is located at
+#
+# http://aws.amazon.com/apache2.0/
+#
+# or in the "license" file accompanying this file. This file is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, either express or implied. See the License for the specific
+# language governing permissions and limitations under the License.
+import logging
+
+import click
+
+from skewer import Skewer
+
+
+FmtString = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+
+def set_debug_logger(logger_name='skewer', stream=None):
+    """
+    Convenience function to quickly configure full debug output
+    to go to the console.
+    """
+    log = logging.getLogger(logger_name)
+    log.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler(stream)
+    ch.setLevel(logging.DEBUG)
+
+    # create formatter
+    formatter = logging.Formatter(FmtString)
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+
+    # add ch to logger
+    log.addHandler(ch)
+
+
+@click.command()
+@click.option(
+    '--host',
+    help="Host name of ElasticSearch server",
+    envvar='SKEWER_HOST'
+)
+@click.option(
+    '--port',
+    help="The port for the ElasticSearch server",
+    type=click.types.INT,
+    envvar='SKEWER_PORT',
+    default=9200
+)
+@click.option(
+    '--arn',
+    help='Turn on debugging output',
+    default='arn:aws:*:*:*:*/*'
+)
+@click.option(
+    '--debug/--no-debug',
+    default=False,
+    help='Turn on debugging output'
+)
+@click.argument(
+    'command',
+    nargs=1,
+    type=click.Choice(['clear', 'index']),
+)    
+def main(command, host=None, port=None, debug=False, arn=None):
+    if debug:
+        set_debug_logger()
+    skewer = Skewer(host=host, port=port)
+    if command == 'clear':
+        skewer.clear_index()
+    elif command == 'index':
+        skewer.index_aws(arn_pattern=arn)
+    
+
+
+if __name__ == '__main__':
+    main()
