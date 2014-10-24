@@ -1,5 +1,5 @@
 {
-  "template" : "grepaws-*",
+  "template" : "skewer-*",
   "settings" : {
     "index.refresh_interval" : "5s"
   },
