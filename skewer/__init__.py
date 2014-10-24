@@ -11,15 +11,32 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+import os
+
+__version__ = open(os.path.join(os.path.dirname(__file__), '_version')).read()
+
 import time
 import logging
-import os
 
 import elasticsearch
 import skew
 
+escape_chars = ['+', '-', '&&', '||', '!', '(', ')', '{', '}', '[', ']',
+                '^', '"', '~', '*', '?', ':', '\\']
 
 LOG = logging.getLogger(__name__)
+
+
+class Query(object):
+
+    def __init__(self, host, port=9200):
+        self._es = elasticsearch.Elasticsearch(
+            hosts=[{'host': host, 'port': port}])
+
+    def search(self, query_string=None, body=None):
+        results = self._es.search(
+            q=query_string, body=body, analyze_wildcard=True)
+        return results['hits']['hits']
 
 
 class Skewer(object):
@@ -75,7 +92,7 @@ class Skewer(object):
             self.es.index(new_index_name, doc_type=resource.resourcetype,
                           id=str(resource), body=resource.data)
             i += 1
-            LOG.debug('indexed %s', resource.arn)
+            LOG.debug('indexed %d resources', i)
 
         # Delete old indexes if they exist and create new aliases
         if self.es.indices.exists(['skewer']):
