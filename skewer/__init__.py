@@ -49,9 +49,9 @@ class Skewer(object):
     def clear_index(self):
         LOG.debug('Deleting existing indices')
         self.es.indices.delete('skewer-*')
-        self.create_template()
 
     def index_aws(self, arn_pattern='arn:aws:*:*:*:*/*'):
+        self.create_template()
         all_services = set()
         all_regions = set()
         all_accounts = set()
